@@ -1,0 +1,98 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <iomanip> // for std::setprecision
+
+using namespace std;
+
+// Function to get the grade point from a letter grade
+double gradeToPoints(const string& grade) {
+    if (grade == "A") return 4.0;
+    if (grade == "B") return 3.0;
+    if (grade == "C") return 2.0;
+    if (grade == "D") return 1.0;
+    if (grade == "F") return 0.0;
+
+    // If the input grade is not valid, return -1.0 to indicate an error
+    return -1.0;
+}
+
+// Function to calculate CGPA and GPA
+void calculateCGPA(const vector<string>& grades, const vector<int>& credits) {
+    double totalGradePoints = 0;
+    int totalCredits = 0;
+    
+    cout << "\nGrade Point Summary:\n";
+    cout << "----------------------------------\n";
+    
+    for (size_t i = 0; i < grades.size(); ++i) {
+        double points = gradeToPoints(grades[i]);
+        if (points < 0) {
+            cout << "Invalid grade entered for Course " << (i + 1) << ": " << grades[i] << "\n";
+            continue; // Skip invalid grades
+        }
+        
+        double gradePointsForCourse = points * credits[i];
+        totalGradePoints += gradePointsForCourse;
+        totalCredits += credits[i];
+
+        cout << "Course " << (i + 1) << ": Grade = " << grades[i]
+             << ", Credits = " << credits[i]
+             << ", Grade Points = " << gradePointsForCourse << "\n";
+    }
+    
+    if (totalCredits > 0) {
+        double CGPA = totalGradePoints / totalCredits;
+        double GPA = totalGradePoints;
+        cout << "\nTotal Grade Points: " << totalGradePoints << "\n";
+        cout << "Total Credits: " << totalCredits << "\n";
+        cout << fixed << setprecision(2); // Set precision for output
+        cout << "CGPA: " << CGPA << "\n";
+        cout << "GPA (Total): " << GPA << "\n";
+    } else {
+        cout << "No valid courses entered.\n";
+    }
+}
+
+int main() {
+    int numCourses;
+
+    cout << "Welcome to the CGPA Calculator\n";
+    cout << "Enter the number of courses taken: ";
+    cin >> numCourses;
+
+    // Validate input for number of courses
+    if (numCourses <= 0) {
+        cout << "Error: Number of courses must be a positive integer.\n";
+        return 1; // Exit with an error code
+    }
+
+    vector<string> grades(numCourses);
+    vector<int> credits(numCourses);
+    
+    // Input for course grades and credits
+    for (int i = 0; i < numCourses; ++i) {
+        cout << "Enter the grade for Course " << (i + 1) << " (A, B, C, D, F): ";
+        cin >> grades[i];
+        cout << "Enter the credits for Course " << (i + 1) << ": ";
+        cin >> credits[i];
+
+        // Validate credits input
+        if (credits[i] <= 0) {
+            cout << "Error: Credits for a course must be a positive integer. Defaulting to 0 for this course.\n";
+            credits[i] = 0; // Default to 0
+        }
+
+        // Validate grade input (accepting only A, B, C, D, F)
+        if (grades[i] != "A" && grades[i] != "B" && grades[i] != "C" &&
+            grades[i] != "D" && grades[i] != "F") {
+            cout << "Error: Invalid grade entered. Defaulting to grade 'F'.\n";
+            grades[i] = "F"; // Default to F if invalid grade is entered
+        }
+    }
+
+    // Calculate CGPA and GPA
+    calculateCGPA(grades, credits);
+
+    return 0; // Exit successfully
+}
