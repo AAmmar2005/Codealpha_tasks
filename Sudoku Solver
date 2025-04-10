@@ -1,0 +1,109 @@
+#include <iostream>
+#include <vector>
+#include <limits> // for std::numeric_limits
+
+using namespace std;
+
+// Define color codes for output
+const string RESET = "\033[0m"; // Reset to default color
+const string GREEN = "\033[32m"; // Green
+const string RED = "\033[31m";   // Red
+const string YELLOW = "\033[33m"; // Yellow
+const string BLUE = "\033[34m";  // Blue
+
+// Function to display the Sudoku board
+void displayBoard(const vector<vector<int>>& board) {
+    cout << BLUE << "Sudoku Board:\n" << RESET;
+    for (int i = 0; i < 9; ++i) {
+        for (int j = 0; j < 9; ++j) {
+            cout << (board[i][j] == 0 ? ". " : to_string(board[i][j]) + " ");
+            if ((j + 1) % 3 == 0) cout << "| ";
+        }
+        cout << "\n";
+        if ((i + 1) % 3 == 0) cout << "---------------------\n";
+    }
+}
+
+// Function to check if a number can be placed in the given cell
+bool isSafe(const vector<vector<int>>& board, int row, int col, int num) {
+    // Check the row, column, and the 3x3 grid
+    for (int x = 0; x < 9; ++x) {
+        if (board[row][x] == num || board[x][col] == num ||
+            board[row - row % 3 + x / 3][col - col % 3 + x % 3] == num) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Function to solve the Sudoku puzzle using backtracking
+bool solveSudoku(vector<vector<int>>& board) {
+    int row, col;
+    bool emptySpot = true;
+
+    // Find an empty spot
+    for (row = 0; row < 9; ++row) {
+        for (col = 0; col < 9; ++col) {
+            if (board[row][col] == 0) {
+                emptySpot = false; // Found an empty spot
+                break;
+            }
+        }
+        if (!emptySpot) break;
+    }
+
+    // If no empty spot is found, we're done
+    if (emptySpot) return true;
+
+    // Trying numbers from 1 to 9
+    for (int num = 1; num <= 9; ++num) {
+        if (isSafe(board, row, col, num)) {
+            board[row][col] = num; // Place the number
+
+            if (solveSudoku(board)) return true; // Recur if successful
+
+            board[row][col] = 0; // Undo and try again
+        }
+    }
+    return false; // Trigger backtracking
+}
+
+// Function to take input for the Sudoku board
+void inputBoard(vector<vector<int>>& board) {
+    cout << YELLOW << "Enter the Sudoku board (Use 0 for empty cells):" << RESET << endl;
+    for (int i = 0; i < 9; ++i) {
+        for (int j = 0; j < 9; ++j) {
+            while (true) {
+                cout << "Cell [" << (i + 1) << "][" << (j + 1) << "]: ";
+                int num;
+                cin >> num;
+
+                // Validate input
+                if (cin.fail() || num < 0 || num > 9) {
+                    cout << RED << "Invalid input! Please enter a number between 0 and 9." << RESET << endl;
+                    cin.clear(); // Clear the error flag
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Discard invalid input
+                } else {
+                    board[i][j] = num;
+                    break; // Valid input, break the loop
+                }
+            }
+        }
+    }
+}
+
+int main() {
+    vector<vector<int>> board(9, vector<int>(9, 0));
+
+    inputBoard(board);
+    displayBoard(board); // Display initial board
+
+    if (solveSudoku(board)) {
+        cout << GREEN << "Sudoku solved successfully!\n" << RESET;
+        displayBoard(board); // Display solved board
+    } else {
+        cout << RED << "No solution exists for the given Sudoku puzzle.\n" << RESET;
+    }
+
+    return 0;
+}
